@@ -4,13 +4,17 @@
   "version": "0.0.0",
   "homepage": "https://srikartalluri.github.io/teleparty",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/srikartalluri/teleparty.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "firebase": "^12.6.0",

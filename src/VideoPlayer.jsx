@@ -1,24 +1,35 @@
 import { useEffect, useRef, useState } from "react";
-import { db } from "./firebase";
+// import { db } from "./firebase";
 import { ref, set, onValue } from "firebase/database";
+import { db, auth, googleProvider} from "./firebaseClient";
 
-export default function VideoPlayer() {
+export default function VideoPlayer({ user }) {
     const videoRef = useRef(null);
     const [videoUrl, setVideoUrl] = useState(null);
 
     useEffect(() => {
         async function fetchUrl() {
-            const res = await fetch("https://teleparty-backend-776935957980.us-west1.run.app/video-url");
+            const idToken = await user.getIdToken();
+
+            const res = await fetch(
+                "https://teleparty-backend-776935957980.us-west1.run.app/video-url",
+                {
+                    headers: {
+                        Authorization: `Bearer ${idToken}`
+                    }
+                }
+            );
+
             const data = await res.json();
-            setVideoUrl(data.url);
-            console.log(data.url);
+            setVideoUrl(data.url);   // signed URL
+            console.log("Signed URL:", data.url);
         }
         fetchUrl();
-    }, []);
-
+    }, [user]);
 
     useEffect(() => {
         if (!videoUrl) return;
+
         const playStateRef = ref(db, "room/playState");
 
         const unsubscribe = onValue(playStateRef, (snapshot) => {
@@ -30,12 +41,10 @@ export default function VideoPlayer() {
 
             const { isPlaying, timestamp } = state;
 
-            // If our time differs too much, adjust
             if (Math.abs(video.currentTime - timestamp) > 0.5) {
                 video.currentTime = timestamp;
             }
 
-            // Sync play/pause
             if (isPlaying) video.play();
             else video.pause();
         });
